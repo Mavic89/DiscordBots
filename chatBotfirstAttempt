@@ -1,0 +1,59 @@
+import os
+
+import discord
+
+
+
+responses = {"hey":"hello!"}
+TOKEN=""
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print(f'{client.user} has connected to discord')
+
+
+@client.event
+async def on_member_join(member):
+    await member.create_dm()
+    await member.dm_channel.send("Hello {member.name} welcome to the server")
+
+
+@client.event 
+async def on_message(message):
+    if(message.author==client.user):
+        return
+    
+    def check(m):
+        print(m.content)
+        return m.content
+
+    if "!kbot" in message.content:
+        input = message.content[5:]
+        foundresponse=False
+        i=0
+        for j in input.split():
+            if(i != 1):
+                for i, k in enumerate(responses):
+                    if(j in k):
+                        await message.channel.send(responses[k])
+                        foundresponse=True
+                        i=1
+        if(foundresponse == False and input != responses[list(responses.keys())[-1]]):
+            await message.channel.send("I dont know, what would you say to that?")
+            reply = await client.wait_for('message',check=check)
+            responses[input] = reply.content
+            print(responses)
+    
+    else:
+        msg = message.content
+        if(not msg in responses and msg != responses[list(responses.keys())[-1]]):
+            print(list(responses.keys())[-1] +" & "+msg)
+            reply = await client.wait_for('message',check=check)
+            responses[msg] = reply.content
+            print(responses)
+            
+
+
+client.run(TOKEN)
